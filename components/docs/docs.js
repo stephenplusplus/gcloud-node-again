@@ -42,7 +42,7 @@ angular
         };
         var a = document.createElement('a');
         return str.replace(regex.see, function(match, module) {
-          a.href = '/gcloud-node/#/docs/' + module;
+          a.href = '#/docs/' + module;
           a.innerText = module;
           return a.outerHTML;
         });
@@ -67,6 +67,9 @@ angular
             return {
               data: obj,
               name: obj.ctx.name,
+              constructor: obj.tags.some(function(tag) {
+                  return tag.type === 'constructor';
+                }),
               description: $sce.trustAsHtml(
                   formatHtml(detectLinks(detectModules(obj.description.full)))),
               params: obj.tags.filter(function(tag) {
@@ -95,7 +98,7 @@ angular
             };
           })
           .sort(function(a, b) {
-            return a.name > b.name;
+            return a.constructor ? -1: a.name > b.name;
           });
       };
     }
@@ -122,10 +125,10 @@ angular
     $routeProvider
       .when('/docs', {
         controller: 'DocsCtrl',
-        templateUrl: '/gcloud-node/components/docs/docs.html',
+        templateUrl: 'components/docs/docs.html',
         resolve: {
           methods: function($http, $sce) {
-            return $http.get('/gcloud-node/json/index.json')
+            return $http.get('json/index.json')
                 .then(filterDocJson($sce))
                 .then(function(methods) {
                   // Prevent displaying permalinks.
@@ -138,30 +141,30 @@ angular
       })
       .when('/docs/:module', {
         controller: 'DocsCtrl',
-        templateUrl: '/gcloud-node/components/docs/docs.html',
+        templateUrl: 'components/docs/docs.html',
         resolve: {
           methods: function($http, $route, $sce) {
             var module = $route.current.params.module;
-            return $http.get('/gcloud-node/json/' + module + '/index.json')
+            return $http.get('json/' + module + '/index.json')
                 .then(filterDocJson($sce));
           }
         }
       })
       .when('/docs/:module/:class', {
         controller: 'DocsCtrl',
-        templateUrl: '/gcloud-node/components/docs/docs.html',
+        templateUrl: 'components/docs/docs.html',
         resolve: {
           methods: function($q, $http, $route, $sce, $location) {
             var module = $route.current.params.module;
             var cl = $route.current.params.class;
             if (MODULE_TO_CLASSES[module].length > 0) {
               return $http
-                  .get('/gcloud-node/json/' + module + '/' + cl + '.json')
+                  .get('json/' + module + '/' + cl + '.json')
                   .then(filterDocJson($sce));
             } else {
               // This is not a class, this is the name of a method.
               var method = cl;
-              return $http.get('/gcloud-node/json/' + module + '/index.json')
+              return $http.get('json/' + module + '/index.json')
                   .then(filterDocJson($sce))
                   .then(setMethod($location, method));
             }
@@ -170,13 +173,13 @@ angular
       })
       .when('/docs/:module/:class/:method', {
         controller: 'DocsCtrl',
-        templateUrl: '/gcloud-node/components/docs/docs.html',
+        templateUrl: 'components/docs/docs.html',
         resolve: {
           methods: function($q, $http, $route, $sce, $location) {
             var module = $route.current.params.module;
             var cl = $route.current.params.class;
             var method = $route.current.params.method;
-            return $http.get('/gcloud-node/json/' + module + '/' + cl + '.json')
+            return $http.get('json/' + module + '/' + cl + '.json')
                 .then(filterDocJson($sce))
                 .then(setMethod($location, method));
           }
@@ -189,7 +192,7 @@ angular
     $scope.isActiveUrl = function(url) {
       var current = $location.path().replace('/' + methods.singleMethod, '');
       var link = url
-          .replace(/^\/gcloud-node\/#/, '')
+          .replace(/^#/, '')
           .replace('/' + methods.singleMethod, '');
       return current === link;
     };
@@ -198,7 +201,7 @@ angular
       return doc.toLowerCase() === $routeParams.module;
     };
 
-    $scope.activeUrl = '/gcloud-node/#' + $location.path();
+    $scope.activeUrl = '#' + $location.path();
     $scope.singleMethod = methods.singleMethod;
     $scope.noPermalink = methods.singleMethod || methods.noPermalink;
     $scope.methods = methods;
@@ -206,11 +209,11 @@ angular
     $scope.pages = [
       {
         title: 'gcloud',
-        url: '/gcloud-node/#/docs'
+        url: '#/docs'
       },
       {
         title: 'Datastore',
-        url: '/gcloud-node/#/docs/datastore',
+        url: '#/docs/datastore',
         pages: [
           {
             title: 'Dataset',
@@ -224,7 +227,7 @@ angular
       },
       {
         title: 'Storage',
-        url: '/gcloud-node/#/docs/storage'
+        url: '#/docs/storage'
       }
     ];
   });

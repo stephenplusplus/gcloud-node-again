@@ -137,6 +137,10 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 300;
 }
 
+h2, h3 {
+    color: #4285f4;
+}
+
 /* Header
    ========================================================================== */
 
@@ -584,6 +588,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .method-heading:hover .permalink {
     display: block;
+}
+
+.sub-heading {
+  color: #5d6061;
+  margin: 0;
+}
+
+.toggler {
+  float: left;
+  min-width: 15px;
+  margin: auto;
+}
+
+.toggle {
+  cursor: pointer;
 }
 
 /*

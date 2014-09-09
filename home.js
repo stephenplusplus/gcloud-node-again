@@ -5,7 +5,7 @@ angular
 
     $routeProvider
       .when('/', {
-        templateUrl: '/gcloud-node/home.html'
+        templateUrl: 'home.html'
       });
   })
   .run(function($rootScope, $location) {
