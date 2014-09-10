@@ -67,9 +67,6 @@ angular
             return {
               data: obj,
               name: obj.ctx.name,
-              constructor: obj.tags.some(function(tag) {
-                  return tag.type === 'constructor';
-                }),
               description: $sce.trustAsHtml(
                   formatHtml(detectLinks(detectModules(obj.description.full)))),
               params: obj.tags.filter(function(tag) {
@@ -98,7 +95,7 @@ angular
             };
           })
           .sort(function(a, b) {
-            return a.constructor ? -1: a.name > b.name;
+            return a.name > b.name;
           });
       };
     }
