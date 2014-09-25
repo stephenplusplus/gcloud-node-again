@@ -73,6 +73,21 @@ var dataset = gcloud.datastore.dataset({
         </p>
       </article>
 
+      <article ng-if="isActiveDoc('pubsub')">
+        <h3>Pub/Sub Overview</h3>
+        <p>
+          The <code>gcloud.pubsub</code> method will return a <code>pubsub</code> object, allowing you to create topics, publish messages, subscribe to topics, and more. See the <a href="https://developers.google.com/pubsub/overview">Google Cloud Pub/Sub overview</a> for more information.
+        </p>
+        <div hljs>
+var pubsub = gcloud.pubsub({
+  projectId: 'myProject',
+  keyFilename: '/path/to/keyfile.json'
+});</div>
+        <p>
+          See the examples below, which demonstrate everything from creating a topic to subscribing to messages on a topic.
+        </p>
+      </article>
+
       <article ng-if="isActiveDoc('storage')">
         <h3>Storage Overview</h3>
         <p>
