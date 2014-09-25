@@ -64,8 +64,7 @@
           The <code>gcloud.datastore</code> object gives you some convenience methods, as well as exposes a <code>dataset</code> function. This will allow you to create a <code>dataset</code>, which is the object from which you will interact with the Google Cloud Datastore.
         </p>
         <div hljs>
-var datastore = gcloud.datastore;
-var dataset = datastore.dataset({
+var dataset = gcloud.datastore.dataset({
   projectId: 'myProject',
   keyFilename: '/path/to/keyfile.json'
 });</div>
@@ -99,8 +98,7 @@ var bucket = gcloud.storage.bucket({
           ng-if="method.name[0].toUpperCase() !== method.name[0]">
           <a
             class="permalink"
-            ng-if="!noPermalink"
-            ng-href="{{activeUrl + '/' + method.name}}">#</a>
+            ng-href="{{activeUrl + '?method=' + method.name}}">#</a>
           {{method.name}}
         </h3>
         <p ng-if="method.description" ng-bind-html="method.description"></p>
@@ -136,7 +134,7 @@ var bucket = gcloud.storage.bucket({
 
   <nav class="side-nav">
     <ul class="page-sections" ng-show="showReference">
-      <li ng-repeat="page in pages">
+      <li ng-repeat="page in links">
         <a
           ng-class="{ current: isActiveUrl(page.url) }"
           ng-href="{{page.url}}">

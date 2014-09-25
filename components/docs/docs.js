@@ -4,8 +4,7 @@ angular
     'use strict';
 
     function filterDocJson($sce, version) {
-      // Transform JSON response to remove extraneous objects, such as copyright
-      // notices & use strict directives.
+      // Transform JSON response to remove extraneous objects.
       function formatHtml(str) {
         return str
             .replace(/\s+/g, ' ')
@@ -42,13 +41,23 @@ angular
         };
         var a = document.createElement('a');
         return str.replace(regex.see, function(match, module) {
-          a.href = '#/docs/' + version + '/' + module;
+          var path = module;
+          if (path.indexOf('#') > -1) {
+            path = path.split('#').map(function(part, index, parts) {
+              if (index < parts.length - 1) {
+                return part + '/';
+              } else {
+                return '?method=' + part;
+              }
+            }).join('');
+          }
+          a.href = '#/docs/' + version + '/' + path;
           a.innerText = module;
           return a.outerHTML;
         });
       }
       function reduceModules(acc, type, index, types) {
-        var CUSTOM_TYPES = ['query', 'dataset'];
+        var CUSTOM_TYPES = ['query', 'dataset', 'topic', 'subscription'];
         if (CUSTOM_TYPES.indexOf(type.toLowerCase()) > -1) {
           if (types[index - 1]) {
             type = types[index - 1] + '/' + type;
@@ -88,10 +97,10 @@ angular
                 })
                 .map(function(tag) {
                   return $sce.trustAsHtml(
-                      tag.types.reduceRight(reduceModules, [])[0])
+                      tag.types.reduceRight(reduceModules, [])[0]);
                 })[0],
               example: obj.tags.filter(function(tag) {
-                  return tag.type === 'example'
+                  return tag.type === 'example';
                 })
                 .map(function(tag) {
                   return tag.string;
@@ -104,24 +113,39 @@ angular
       };
     }
 
-    function setMethod($location, methodName, version) {
+    function setSingleMethod(method) {
       return function(methods) {
-        var methodExists = methods.some(function(methodObj) {
-          return methodName === methodObj.name;
-        });
-        if (methodExists) {
-          methods.singleMethod = methodName;
-          return methods;
-        } else {
-          $location.path('/docs/' + version + '/' + module + '/' + cl);
+        if (method && methods.some(function(methodObj) {
+          return methodObj.name === method;
+        })) {
+          methods.singleMethod = method;
         }
+        return methods;
       };
     }
 
-    var MODULE_TO_CLASSES = {
-      datastore: ['dataset', 'query'],
-      storage: []
-    };
+    function getMethods($http, $route, $sce, $location) {
+      var version = $route.current.params.version;
+      var module = $route.current.params.module;
+      var cl = $route.current.params.class;
+      var path = ['json', version];
+      if (!module && !cl) {
+        path.push('index.json');
+      } else if (module && !cl) {
+        path.push(module);
+        path.push('index.json');
+      } else if (module && cl) {
+        path.push(module);
+        path.push(cl + '.json');
+      }
+      return $http.get(path.join('/'))
+          .then(filterDocJson($sce, version))
+          .then(setSingleMethod($location.search().method));
+    }
+
+    function getLinks($route, getLinks) {
+      return getLinks($route.current.params.version);
+    }
 
     $routeProvider
       .when('/docs', {
@@ -134,72 +158,41 @@ angular
       .when('/docs/:version', {
         controller: 'DocsCtrl',
         templateUrl: 'components/docs/docs.html',
-        resolve: {
-          methods: function($http, $route, $sce) {
-            var version = $route.current.params.version;
-            return $http.get('json/' + version + '/index.json')
-                .then(filterDocJson($sce, version))
-                .then(function(methods) {
-                  // Prevent displaying permalinks.
-                  // ** Can remove when PubSub api is documented **
-                  methods.noPermalink = true;
-                  return methods;
-                });
-          }
-        }
+        resolve: { methods: getMethods, links: getLinks }
       })
       .when('/docs/:version/:module', {
         controller: 'DocsCtrl',
         templateUrl: 'components/docs/docs.html',
-        resolve: {
-          methods: function($http, $route, $sce) {
-            var version = $route.current.params.version;
-            var module = $route.current.params.module;
-            return $http.get('json/' + version + '/' + module + '/index.json')
-                .then(filterDocJson($sce, version));
-          }
-        }
+        resolve: { methods: getMethods, links: getLinks }
       })
       .when('/docs/:version/:module/:class', {
         controller: 'DocsCtrl',
         templateUrl: 'components/docs/docs.html',
-        resolve: {
-          methods: function($q, $http, $route, $sce, $location) {
-            var version = $route.current.params.version;
-            var module = $route.current.params.module;
-            var cl = $route.current.params.class;
-            if (MODULE_TO_CLASSES[module].length > 0) {
-              return $http
-                  .get('json/' + version + '/' + module + '/' + cl + '.json')
-                  .then(filterDocJson($sce, version));
-            } else {
-              // This is not a class, this is the name of a method.
-              var method = cl;
-              return $http.get('json/' + version + '/' +module + '/index.json')
-                  .then(filterDocJson($sce, version))
-                  .then(setMethod($location, method, version));
-            }
-          }
-        }
-      })
-      .when('/docs/:version/:module/:class/:method', {
-        controller: 'DocsCtrl',
-        templateUrl: 'components/docs/docs.html',
-        resolve: {
-          methods: function($q, $http, $route, $sce, $location) {
-            var version = $route.current.params.version;
-            var module = $route.current.params.module;
-            var cl = $route.current.params.class;
-            var method = $route.current.params.method;
-            return $http.get('json/' + version + '/' + module + '/' + cl + '.json')
-                .then(filterDocJson($sce, version))
-                .then(setMethod($location, method, version));
-          }
-        }
+        resolve: { methods: getMethods, links: getLinks }
       });
   })
 
-  .controller('DocsCtrl', function($location, $scope, $routeParams, methods, $http, versions) {
+  .run(function($location, $route, $rootScope, versions) {
+    'use strict';
+
+    $rootScope.$on('$routeChangeStart', function(event, route) {
+      var url = $location.path();
+      if (url.indexOf('/docs/') === -1 || (!route.params || !route.params.version)) {
+        // This isn't a `docs` route or it's not one that expects a version.
+        // No need to re-direct request.
+        return;
+      }
+      if (versions.indexOf(route.params.version) === -1) {
+        // No version specified where one was expected.
+        // Route to same url with latest version prepended.
+        event.preventDefault();
+        $route.reload();
+        $location.path(url.replace('docs/', 'docs/' + versions[0] + '/'));
+      }
+    });
+  })
+
+  .controller('DocsCtrl', function($location, $scope, $routeParams, methods, $http, links, versions) {
     'use strict';
 
     $scope.isActiveUrl = function(url) {
@@ -218,44 +211,17 @@ angular
     $scope.showReference = true;
     $scope.activeUrl = '#' + $location.path();
     $scope.singleMethod = methods.singleMethod;
-    $scope.noPermalink = methods.singleMethod || methods.noPermalink;
     $scope.methods = methods;
     $scope.module = $routeParams.module;
     $scope.version = $routeParams.version;
     $scope.isLatestVersion = $scope.version == versions[0];
     $scope.versions = versions;
-    var baseUrl = '#/docs/' + $scope.version;
-    /*
-    TODO(silvano): future versions will introduce new pages, so the list below will have
-    to be generated according to the specific version
-    */
-    $scope.pages = [
-      {
-        title: 'gcloud',
-        url: baseUrl
-      },
-      {
-        title: 'Datastore',
-        url: baseUrl + '/datastore',
-        pages: [
-          {
-            title: 'Dataset',
-            url: '/dataset'
-          },
-          {
-            title: 'Query',
-            url: '/query'
-          }
-        ]
-      },
-      {
-        title: 'Storage',
-        url: baseUrl + '/storage'
-      }
-    ];
+    $scope.links = links;
   })
 
   .controller('HistoryCtrl', function($scope, versions) {
+    'use strict';
+
     $scope.pageTitle = 'Node.js Docs Versions';
     $scope.showHistory = true;
     $scope.versions = versions;

@@ -1,0 +1,341 @@
+[
+  {
+    "tags": [],
+    "description": {
+      "full": "<p>Copyright 2014 Google Inc. All Rights Reserved.</p><p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);<br />you may not use this file except in compliance with the License.<br />You may obtain a copy of the License at</p><pre><code> http://www.apache.org/licenses/LICENSE-2.0\n</code></pre><p>Unless required by applicable law or agreed to in writing, software<br />distributed under the License is distributed on an &quot;AS IS&quot; BASIS,<br />WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />See the License for the specific language governing permissions and<br />limitations under the License.</p>",
+      "summary": "<p>Copyright 2014 Google Inc. All Rights Reserved.</p>",
+      "body": "<p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);<br />you may not use this file except in compliance with the License.<br />You may obtain a copy of the License at</p><pre><code> http://www.apache.org/licenses/LICENSE-2.0\n</code></pre><p>Unless required by applicable law or agreed to in writing, software<br />distributed under the License is distributed on an &quot;AS IS&quot; BASIS,<br />WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />See the License for the specific language governing permissions and<br />limitations under the License.</p>"
+    },
+    "isPrivate": false,
+    "ignore": true
+  },
+  {
+    "tags": [],
+    "description": {
+      "full": "<p>@module pubsub/subscription</p>",
+      "summary": "<p>@module pubsub/subscription</p>",
+      "body": ""
+    },
+    "isPrivate": false,
+    "ignore": true,
+    "code": "'use strict';\n\nvar events = require('events');\nvar nodeutil = require('util');"
+  },
+  {
+    "tags": [
+      {
+        "type": "private",
+        "visibility": "private"
+      }
+    ],
+    "description": {
+      "full": "<p>@type module:common/util</p>",
+      "summary": "<p>@type module:common/util</p>",
+      "body": ""
+    },
+    "isPrivate": true,
+    "ignore": false,
+    "code": "var util = require('../common/util.js');",
+    "ctx": {
+      "type": "declaration",
+      "name": "util",
+      "value": "require('../common/util.js')",
+      "string": "util"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "param",
+        "types": [
+          "module:pubsub"
+        ],
+        "name": "pubsub",
+        "description": "- PubSub object."
+      },
+      {
+        "type": "param",
+        "types": [
+          "object"
+        ],
+        "name": "options",
+        "description": "- Configuration object."
+      },
+      {
+        "type": "param",
+        "types": [
+          "boolean"
+        ],
+        "name": "options.autoAck",
+        "description": "- Automatically acknowledge the message     once it's pulled. (default: false)"
+      },
+      {
+        "type": "param",
+        "types": [
+          "number"
+        ],
+        "name": "options.interval",
+        "description": "- Interval in milliseconds to check for new     messages. (default: 10)"
+      },
+      {
+        "type": "param",
+        "types": [
+          "string"
+        ],
+        "name": "options.name",
+        "description": "- Name of the subscription."
+      }
+    ],
+    "description": {
+      "full": "<p>Developer Documentation</p>",
+      "summary": "<p>Developer Documentation</p>",
+      "body": ""
+    },
+    "isPrivate": false,
+    "ignore": true
+  },
+  {
+    "tags": [
+      {
+        "type": "alias",
+        "string": "pubsub/subscription"
+      },
+      {
+        "type": "constructor",
+        "string": ""
+      },
+      {
+        "type": "example",
+        "string": "// From pubsub.getSubscriptions:\npubsub.getSubscriptions(function(err, subscriptions) {\n  // `subscriptions` is an array of Subscription objects.\n});\n\n// From topic.getSubscriptions:\nvar topic = pubsub.topic('my-existing-topic');\ntopic.getSubscriptions(function(err, subscriptions) {\n  // `subscriptions` is an array of Subscription objects.\n});\n\n// From topic.subscribe:\nvar topic = pubsub.topic('my-existing-topic');\ntopic.subscribe('new-subscrpition', function(err, subscription) {\n  // `subscription` is a Subscription object.\n});\n\n// From topic.subscription:\nvar topic = pubsub.topic('my-existing-topic');\nvar subscription = topic.subscription('my-existing-subscription');\n// `subscription` is a Subscription object."
+      }
+    ],
+    "description": {
+      "full": "<p>A Subscription object will give you access to your Google Cloud Pub/Sub<br />subscription.</p><p>Subscriptions are sometimes retrieved when using various methods:</p><ul>\n<li>{@linkcode module:pubsub#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#subscribe}</li>\n</ul>\n<p>Subscription objects may be created directly with:</p><ul>\n<li>{@linkcode module:pubsub/topic#subscription}</li>\n</ul>\n",
+      "summary": "<p>A Subscription object will give you access to your Google Cloud Pub/Sub<br />subscription.</p>",
+      "body": "<p>Subscriptions are sometimes retrieved when using various methods:</p><ul>\n<li>{@linkcode module:pubsub#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#subscribe}</li>\n</ul>\n<p>Subscription objects may be created directly with:</p><ul>\n<li>{@linkcode module:pubsub/topic#subscription}</li>\n</ul>\n"
+    },
+    "isPrivate": false,
+    "ignore": false,
+    "code": "function Subscription(pubsub, options) {\n  events.EventEmitter.call(this);\n\n  this.name = Subscription.formatName_(pubsub.projectId, options.name);\n  this.request = pubsub.makeReq_.bind(pubsub);\n\n  this.autoAck = util.is(options.autoAck, 'boolean') ? options.autoAck : false;\n  this.closed = false;\n  this.interval = util.is(options.interval, 'number') ? options.interval : 10;\n}\n\nnodeutil.inherits(Subscription, events.EventEmitter);",
+    "ctx": {
+      "type": "function",
+      "name": "Subscription",
+      "string": "Subscription()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "private",
+        "visibility": "private"
+      }
+    ],
+    "description": {
+      "full": "<p>Format the name of a subscription. A subscription&#39;s full name is in the<br />format of /subscription/{projectId}/{name}.</p>",
+      "summary": "<p>Format the name of a subscription. A subscription&#39;s full name is in the<br />format of /subscription/{projectId}/{name}.</p>",
+      "body": ""
+    },
+    "isPrivate": true,
+    "ignore": false,
+    "code": "Subscription.formatName_ = function(projectId, name) {\n  // Simple check if the name is already formatted.\n  if (name.indexOf('/') > -1) {\n    return name;\n  }\n  return '/subscriptions/' + projectId + '/' + name;\n};",
+    "ctx": {
+      "type": "method",
+      "receiver": "Subscription",
+      "name": "formatName_",
+      "string": "Subscription.formatName_()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "throws",
+        "types": [
+          "Error"
+        ],
+        "description": "If at least one id is not provided. "
+      },
+      {
+        "type": "param",
+        "types": [
+          "string",
+          "string[]"
+        ],
+        "name": "ids",
+        "description": "- An ID or array of message IDs."
+      },
+      {
+        "type": "param",
+        "types": [
+          "function"
+        ],
+        "name": "callback",
+        "description": "- The callback function. "
+      },
+      {
+        "type": "example",
+        "string": "subscription.ack('ePHEESyhuE8e...', function(err) {});"
+      }
+    ],
+    "description": {
+      "full": "<p>Acknowledge to the backend that the message was retrieved. You must provide<br />either a single ID, or an array of ids.</p>",
+      "summary": "<p>Acknowledge to the backend that the message was retrieved. You must provide<br />either a single ID, or an array of ids.</p>",
+      "body": ""
+    },
+    "isPrivate": false,
+    "ignore": false,
+    "code": "Subscription.prototype.ack = function(ids, callback) {\n  if (!ids || ids.length === 0) {\n    throw new Error(\n        'At least one ID must be specified before it can be acknowledged');\n  }\n  ids = util.arrayize(ids);\n  var body = {\n    subscription: this.name,\n    ackId: ids\n  };\n  this.request('POST', 'subscriptions/acknowledge', null, body, callback);\n};",
+    "ctx": {
+      "type": "method",
+      "constructor": "Subscription",
+      "cons": "Subscription",
+      "name": "ack",
+      "string": "Subscription.prototype.ack()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "param",
+        "types": [
+          "object="
+        ],
+        "name": "options",
+        "description": "- Configuration object."
+      },
+      {
+        "type": "param",
+        "types": [
+          "boolean="
+        ],
+        "name": "options.returnImmediately",
+        "description": "- If set, the system will respond     immediately. Otherwise, wait until new messages are available. Returns if\n    timeout is reached."
+      },
+      {
+        "type": "param",
+        "types": [
+          "function"
+        ],
+        "name": "callback",
+        "description": "- The callback function. "
+      },
+      {
+        "type": "example",
+        "string": "// Register a listener for `message` events.\nsubscription.on('message', function(message) {\n  // message.id = ID used to acknowledge its receival.\n  // message.data = Contents of the message.\n  // Called every time a message is received.\n});\nsubscription.pull(function(err) {});"
+      }
+    ],
+    "description": {
+      "full": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p><p>To pull for new messages automatically, see<br />{@linkcode module:pubsub/subscription#startPulling}.</p>",
+      "summary": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p>",
+      "body": "<p>To pull for new messages automatically, see<br />{@linkcode module:pubsub/subscription#startPulling}.</p>"
+    },
+    "isPrivate": false,
+    "ignore": false,
+    "code": "Subscription.prototype.pull = function(options, callback) {\n  var that = this;\n  // TODO(jbd): Should not be racing with other pull.\n  if (!callback) {\n    callback = options;\n    options = {};\n  }\n  var body = {\n    subscription: this.name,\n    returnImmediately: !!options.returnImmediately\n  };\n  this.request(\n      'POST', 'subscriptions/pull', null, body, function(err, message) {\n    // TODO(jbd): Fix API to return a list of messages.\n    if (err) {\n      callback(err);\n      return;\n    }\n    if (!that.autoAck) {\n      that.emitMessage_(message);\n      callback();\n      return;\n    }\n    that.ack(message.ackId, function(err) {\n      if (err) {\n        callback(err);\n        return;\n      }\n      that.emitMessage_(message);\n      callback();\n    });\n  });\n};",
+    "ctx": {
+      "type": "method",
+      "constructor": "Subscription",
+      "cons": "Subscription",
+      "name": "pull",
+      "string": "Subscription.prototype.pull()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "param",
+        "types": [
+          "function="
+        ],
+        "name": "callback",
+        "description": "- The callback function. "
+      },
+      {
+        "type": "example",
+        "string": "subscription.delete(function(err) {});"
+      }
+    ],
+    "description": {
+      "full": "<p>Delete the subscription. Pull requests from the current subscription will be<br />errored once unsubscription is complete.</p>",
+      "summary": "<p>Delete the subscription. Pull requests from the current subscription will be<br />errored once unsubscription is complete.</p>",
+      "body": ""
+    },
+    "isPrivate": false,
+    "ignore": false,
+    "code": "Subscription.prototype.delete = function(callback) {\n  callback = callback || util.noop;\n  this.request(\n      'DELETE', 'subscriptions/' + this.name, null, true, function(err) {\n    if (err) {\n      callback(err);\n      return;\n    }\n    this.closed = true;\n    callback(null);\n  }.bind(this));\n};",
+    "ctx": {
+      "type": "method",
+      "constructor": "Subscription",
+      "cons": "Subscription",
+      "name": "delete",
+      "string": "Subscription.prototype.delete()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "example",
+        "string": "subscription.on('message', function(message) {\n  // message.id = ID used to acknowledge its receival.\n  // message.data = Contents of the message.\n  // Called every time a message is received.\n});\nsubscription.startPulling();"
+      }
+    ],
+    "description": {
+      "full": "<p>Poll the backend for new messages. This runs a loop to ping the API at the<br />provided interval from the subscription&#39;s instantiation. If you didn&#39;t<br />provide one, the default value is 10 milliseconds.</p><p>If messages are received, you can catch them by registering a listener for<br />the <code>message</code> event.</p><p>To stop pulling, see {@linkcode module:pubsub/subscription#stopPulling}.</p>",
+      "summary": "<p>Poll the backend for new messages. This runs a loop to ping the API at the<br />provided interval from the subscription&#39;s instantiation. If you didn&#39;t<br />provide one, the default value is 10 milliseconds.</p>",
+      "body": "<p>If messages are received, you can catch them by registering a listener for<br />the <code>message</code> event.</p><p>To stop pulling, see {@linkcode module:pubsub/subscription#stopPulling}.</p>"
+    },
+    "isPrivate": false,
+    "ignore": false,
+    "code": "Subscription.prototype.startPulling = function() {\n  if (this.closed) {\n    return;\n  }\n  this.pull({\n    returnImmediately: false\n  }, function(err) {\n    if (err && err.code === 400) {\n      this.emit('error', err);\n    }\n    setTimeout(this.startPulling.bind(this), this.interval);\n  }.bind(this));\n};",
+    "ctx": {
+      "type": "method",
+      "constructor": "Subscription",
+      "cons": "Subscription",
+      "name": "startPulling",
+      "string": "Subscription.prototype.startPulling()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "example",
+        "string": "subscription.startPulling();\nsubscription.stopPulling();"
+      }
+    ],
+    "description": {
+      "full": "<p>Stop the subscription from automatically pulling. This is only necessary if<br />you had previously run {@linkcode pubsub/subscription#startPulling}.</p>",
+      "summary": "<p>Stop the subscription from automatically pulling. This is only necessary if<br />you had previously run {@linkcode pubsub/subscription#startPulling}.</p>",
+      "body": ""
+    },
+    "isPrivate": false,
+    "ignore": false,
+    "code": "Subscription.prototype.stopPulling = function() {\n  this.closed = true;\n};",
+    "ctx": {
+      "type": "method",
+      "constructor": "Subscription",
+      "cons": "Subscription",
+      "name": "stopPulling",
+      "string": "Subscription.prototype.stopPulling()"
+    }
+  },
+  {
+    "tags": [
+      {
+        "type": "private",
+        "visibility": "private"
+      }
+    ],
+    "description": {
+      "full": "<p>Emits a &#39;message&#39; event with the provided message.</p><p>The message is simplified from the API response to have simply two<br />properties, <code>id</code> and <code>data</code>. <code>data</code> is always converted to a string.</p>",
+      "summary": "<p>Emits a &#39;message&#39; event with the provided message.</p>",
+      "body": "<p>The message is simplified from the API response to have simply two<br />properties, <code>id</code> and <code>data</code>. <code>data</code> is always converted to a string.</p>"
+    },
+    "isPrivate": true,
+    "ignore": false,
+    "code": "Subscription.prototype.emitMessage_ = function(msg) {\n  var message = {\n    id: msg.ackId\n  };\n  if (msg.pubsubEvent && msg.pubsubEvent.message) {\n    message.data =\n      new Buffer(msg.pubsubEvent.message.data, 'base64').toString('utf-8');\n    try {\n      message.data = JSON.parse(message.data);\n    } catch(e) {}\n  }\n  this.emit('message', message);\n};\n\nmodule.exports = Subscription;",
+    "ctx": {
+      "type": "method",
+      "constructor": "Subscription",
+      "cons": "Subscription",
+      "name": "emitMessage_",
+      "string": "Subscription.prototype.emitMessage_()"
+    }
+  }
+]
