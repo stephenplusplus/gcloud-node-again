@@ -160,6 +160,13 @@
   {
     "tags": [
       {
+        "type": "throws",
+        "types": [
+          "Error"
+        ],
+        "description": "If no message is provided. "
+      },
+      {
         "type": "param",
         "types": [
           "*"
@@ -198,6 +205,13 @@
   },
   {
     "tags": [
+      {
+        "type": "throws",
+        "types": [
+          "Error"
+        ],
+        "description": "If no message is provided. "
+      },
       {
         "type": "param",
         "types": [

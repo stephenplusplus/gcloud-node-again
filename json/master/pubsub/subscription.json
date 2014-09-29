@@ -105,17 +105,17 @@
       },
       {
         "type": "example",
-        "string": "// From pubsub.getSubscriptions:\npubsub.getSubscriptions(function(err, subscriptions) {\n  // `subscriptions` is an array of Subscription objects.\n});\n\n// From topic.getSubscriptions:\nvar topic = pubsub.topic('my-existing-topic');\ntopic.getSubscriptions(function(err, subscriptions) {\n  // `subscriptions` is an array of Subscription objects.\n});\n\n// From topic.subscribe:\nvar topic = pubsub.topic('my-existing-topic');\ntopic.subscribe('new-subscrpition', function(err, subscription) {\n  // `subscription` is a Subscription object.\n});\n\n// From topic.subscription:\nvar topic = pubsub.topic('my-existing-topic');\nvar subscription = topic.subscription('my-existing-subscription');\n// `subscription` is a Subscription object."
+        "string": "// From pubsub.getSubscriptions:\npubsub.getSubscriptions(function(err, subscriptions) {\n  // `subscriptions` is an array of Subscription objects.\n});\n\n// From topic.getSubscriptions:\nvar topic = pubsub.topic('my-existing-topic');\ntopic.getSubscriptions(function(err, subscriptions) {\n  // `subscriptions` is an array of Subscription objects.\n});\n\n// From topic.subscribe:\nvar topic = pubsub.topic('my-existing-topic');\ntopic.subscribe('new-subscrpition', function(err, subscription) {\n  // `subscription` is a Subscription object.\n});\n\n// From topic.subscription:\nvar topic = pubsub.topic('my-existing-topic');\nvar subscription = topic.subscription('my-existing-subscription');\n// `subscription` is a Subscription object.\n\n// Once you have obtained a subscription object, you may begin to register\n// listeners. This will automatically trigger pulling for messages.\n\n// Register an error handler.\nsubscription.on('error', function(err) {});\n\n// Register a listener for `message` events.\nsubscription.on('message', function(message) {\n  // Called every time a message is received.\n  // message.id = ID used to acknowledge its receival.\n  // message.data = Contents of the message.\n});"
       }
     ],
     "description": {
-      "full": "<p>A Subscription object will give you access to your Google Cloud Pub/Sub<br />subscription.</p><p>Subscriptions are sometimes retrieved when using various methods:</p><ul>\n<li>{@linkcode module:pubsub#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#subscribe}</li>\n</ul>\n<p>Subscription objects may be created directly with:</p><ul>\n<li>{@linkcode module:pubsub/topic#subscription}</li>\n</ul>\n",
+      "full": "<p>A Subscription object will give you access to your Google Cloud Pub/Sub<br />subscription.</p><p>Subscriptions are sometimes retrieved when using various methods:</p><ul>\n<li>{@linkcode module:pubsub#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#subscribe}</li>\n</ul>\n<p>Subscription objects may be created directly with:</p><ul>\n<li>{@linkcode module:pubsub/topic#subscription}</li>\n</ul>\n<p>A subscription won&#39;t begin pulling for messages until you register an event<br />listener. See below for an example.</p>",
       "summary": "<p>A Subscription object will give you access to your Google Cloud Pub/Sub<br />subscription.</p>",
-      "body": "<p>Subscriptions are sometimes retrieved when using various methods:</p><ul>\n<li>{@linkcode module:pubsub#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#subscribe}</li>\n</ul>\n<p>Subscription objects may be created directly with:</p><ul>\n<li>{@linkcode module:pubsub/topic#subscription}</li>\n</ul>\n"
+      "body": "<p>Subscriptions are sometimes retrieved when using various methods:</p><ul>\n<li>{@linkcode module:pubsub#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#getSubscriptions}</li>\n<li>{@linkcode module:pubsub/topic#subscribe}</li>\n</ul>\n<p>Subscription objects may be created directly with:</p><ul>\n<li>{@linkcode module:pubsub/topic#subscription}</li>\n</ul>\n<p>A subscription won&#39;t begin pulling for messages until you register an event<br />listener. See below for an example.</p>"
     },
     "isPrivate": false,
     "ignore": false,
-    "code": "function Subscription(pubsub, options) {\n  events.EventEmitter.call(this);\n\n  this.name = Subscription.formatName_(pubsub.projectId, options.name);\n  this.request = pubsub.makeReq_.bind(pubsub);\n\n  this.autoAck = util.is(options.autoAck, 'boolean') ? options.autoAck : false;\n  this.closed = false;\n  this.interval = util.is(options.interval, 'number') ? options.interval : 10;\n\n  this.once('newListener', this.startPulling_.bind(this));\n}\n\nnodeutil.inherits(Subscription, events.EventEmitter);",
+    "code": "function Subscription(pubsub, options) {\n  events.EventEmitter.call(this);\n\n  this.name = Subscription.formatName_(pubsub.projectId, options.name);\n  this.request = pubsub.makeReq_.bind(pubsub);\n\n  this.autoAck = util.is(options.autoAck, 'boolean') ? options.autoAck : false;\n  this.closed = false;\n  this.interval = util.is(options.interval, 'number') ? options.interval : 10;\n\n  this.once('newListener', function() {\n    setImmediate(this.startPulling_.bind(this));\n  }.bind(this));\n}\n\nnodeutil.inherits(Subscription, events.EventEmitter);",
     "ctx": {
       "type": "function",
       "name": "Subscription",
@@ -219,7 +219,7 @@
       },
       {
         "type": "example",
-        "string": "// Register a listener for `message` events.\nsubscription.on('message', function(message) {\n  // Called every time a message is received.\n  // message.id = ID used to acknowledge its receival.\n  // message.data = Contents of the message.\n});\nsubscription.pull(function(err) {});"
+        "string": "subscription.pull(function(err) {});"
       }
     ],
     "description": {
@@ -300,23 +300,23 @@
     "tags": [
       {
         "type": "example",
-        "string": "subscription.stopPulling();"
+        "string": "subscription.close();"
       }
     ],
     "description": {
-      "full": "<p>Stop the subscription from automatically pulling.</p>",
-      "summary": "<p>Stop the subscription from automatically pulling.</p>",
+      "full": "<p>Stop the subscription from automatically pulling. You will still be able to<br />call {@linkcode module:pubsub/subscription#pull} directly.</p>",
+      "summary": "<p>Stop the subscription from automatically pulling. You will still be able to<br />call {@linkcode module:pubsub/subscription#pull} directly.</p>",
       "body": ""
     },
     "isPrivate": false,
     "ignore": false,
-    "code": "Subscription.prototype.stopPulling = function() {\n  this.closed = true;\n};",
+    "code": "Subscription.prototype.close = function() {\n  this.closed = true;\n};",
     "ctx": {
       "type": "method",
       "constructor": "Subscription",
       "cons": "Subscription",
-      "name": "stopPulling",
-      "string": "Subscription.prototype.stopPulling()"
+      "name": "close",
+      "string": "Subscription.prototype.close()"
     }
   },
   {
