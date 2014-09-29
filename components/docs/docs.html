@@ -132,9 +132,8 @@ var bucket = gcloud.storage.bucket({
         <h4 ng-show="method.returns">Returns</h4>
         <p ng-show="method.returns" ng-bind-html="method.returns"></p>
         <h4 ng-show="method.example">Example</h4>
-        <div ng-repeat-end
-          ng-show="method.example"
-          hljs source="method.example" language="js"></div>
+        <div docs-example ng-repeat-end
+          ng-show="method.example" ng-bind-html="method.example"></div>
         <hr ng-if="$index < methods.length - 1">
       </article>
     </article>

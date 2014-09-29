@@ -11,6 +11,34 @@ angular
             .replace(/<br *\/*>/g, ' ')
             .replace(/`([^`]*)`/g, '<code>$1</code>');
       }
+      function formatComments(str) {
+        var matched = 0;
+        var paragraphComments = /\/\/-+((\n|\r|.)*?(\/\/-))/g;
+
+        if (!paragraphComments.test(str)) {
+          return '<div hljs language="javascript">' + str + '</div>';
+        }
+
+        str = str.replace(paragraphComments, function(match, block) {
+          return '' +
+              (++matched > 1 ? '</div>' : '') +
+              '<p>' +
+              formatHtml(detectLinks(detectModules(
+                block.trim()
+                  .replace(/\/\/-*\s*/g, '\n')
+                  .replace(/\n\n/g, '\n')
+                  .replace(/(\w)\n(\w)/g, '$1 $2')
+                  .replace(/\n\n/g, '</p><p>')
+              ))) +
+              '</p>' +
+              '<div hljs language="javascript">';
+        });
+
+        str = str.replace(/(<div[^>]*>)\n+/g, '$1\n');
+        str = str.replace(/\n<\/div>/g, '</div>');
+
+        return str;
+      }
       function detectLinks(str) {
         var regex = {
           withCode: /{@linkcode <a href="([^\"]*)">([^<]*)<\/a>/g,
@@ -103,7 +131,7 @@ angular
                   return tag.type === 'example';
                 })
                 .map(function(tag) {
-                  return tag.string;
+                  return $sce.trustAsHtml(formatComments(tag.string));
                 })[0]
             };
           })
@@ -192,6 +220,18 @@ angular
     });
   })
 
+  .directive('docsExample', function($compile) {
+    'use strict';
+
+    return {
+      link: function(scope, element, attr) {
+        scope.$watch(attr.ngBindHtml, function() {
+          $compile(element.contents())(scope);
+        }, true);
+      }
+    };
+  })
+
   .controller('DocsCtrl', function($location, $scope, $routeParams, methods, $http, links, versions) {
     'use strict';
 
@@ -211,8 +251,8 @@ angular
     $scope.showReference = true;
     $scope.activeUrl = '#' + $location.path();
     $scope.singleMethod = methods.singleMethod;
-    $scope.methods = methods;
     $scope.module = $routeParams.module;
+    $scope.methods = methods;
     $scope.version = $routeParams.version;
     $scope.isLatestVersion = $scope.version == versions[0];
     $scope.versions = versions;
