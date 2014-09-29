@@ -223,9 +223,9 @@
       }
     ],
     "description": {
-      "full": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p><p>Note that messages are pulled automatically, once you register your first<br />event listener to the subscription.</p>",
-      "summary": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p>",
-      "body": "<p>Note that messages are pulled automatically, once you register your first<br />event listener to the subscription.</p>"
+      "full": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event.</p><p>Note that messages are pulled automatically once you register your first<br />event listener to the subscription, thus the call to <code>pull</code> is handled for<br />you.</p><p>Calling <code>pull</code> directly can be helpful after your subscription has been<br />closed with {@linkcode module:pubsub/subscription#close}.</p>",
+      "summary": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event.</p>",
+      "body": "<p>Note that messages are pulled automatically once you register your first<br />event listener to the subscription, thus the call to <code>pull</code> is handled for<br />you.</p><p>Calling <code>pull</code> directly can be helpful after your subscription has been<br />closed with {@linkcode module:pubsub/subscription#close}.</p>"
     },
     "isPrivate": false,
     "ignore": false,
