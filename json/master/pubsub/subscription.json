@@ -115,7 +115,7 @@
     },
     "isPrivate": false,
     "ignore": false,
-    "code": "function Subscription(pubsub, options) {\n  events.EventEmitter.call(this);\n\n  this.name = Subscription.formatName_(pubsub.projectId, options.name);\n  this.request = pubsub.makeReq_.bind(pubsub);\n\n  this.autoAck = util.is(options.autoAck, 'boolean') ? options.autoAck : false;\n  this.closed = false;\n  this.interval = util.is(options.interval, 'number') ? options.interval : 10;\n}\n\nnodeutil.inherits(Subscription, events.EventEmitter);",
+    "code": "function Subscription(pubsub, options) {\n  events.EventEmitter.call(this);\n\n  this.name = Subscription.formatName_(pubsub.projectId, options.name);\n  this.request = pubsub.makeReq_.bind(pubsub);\n\n  this.autoAck = util.is(options.autoAck, 'boolean') ? options.autoAck : false;\n  this.closed = false;\n  this.interval = util.is(options.interval, 'number') ? options.interval : 10;\n\n  this.once('newListener', this.startPulling_.bind(this));\n}\n\nnodeutil.inherits(Subscription, events.EventEmitter);",
     "ctx": {
       "type": "function",
       "name": "Subscription",
@@ -223,9 +223,9 @@
       }
     ],
     "description": {
-      "full": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p><p>To pull for new messages automatically, see<br />{@linkcode module:pubsub/subscription#startPulling}.</p>",
+      "full": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p><p>Note that messages are pulled automatically, once you register your first<br />event listener to the subscription.</p>",
       "summary": "<p>Pull messages from the subscribed topic. If messages were found, they are<br />passed along with a <code>message</code> event. The example below shows how to register<br />a listener for this event.</p>",
-      "body": "<p>To pull for new messages automatically, see<br />{@linkcode module:pubsub/subscription#startPulling}.</p>"
+      "body": "<p>Note that messages are pulled automatically, once you register your first<br />event listener to the subscription.</p>"
     },
     "isPrivate": false,
     "ignore": false,
@@ -272,8 +272,12 @@
   {
     "tags": [
       {
+        "type": "private",
+        "visibility": "private"
+      },
+      {
         "type": "example",
-        "string": "subscription.on('message', function(message) {\n  // message.id = ID used to acknowledge its receival.\n  // message.data = Contents of the message.\n  // Called every time a message is received.\n});\nsubscription.startPulling();"
+        "string": "subscription.startPulling_();"
       }
     ],
     "description": {
@@ -281,27 +285,27 @@
       "summary": "<p>Poll the backend for new messages. This runs a loop to ping the API at the<br />provided interval from the subscription&#39;s instantiation. If you didn&#39;t<br />provide one, the default value is 10 milliseconds.</p>",
       "body": "<p>If messages are received, you can catch them by registering a listener for<br />the <code>message</code> event.</p><p>To stop pulling, see {@linkcode module:pubsub/subscription#stopPulling}.</p>"
     },
-    "isPrivate": false,
+    "isPrivate": true,
     "ignore": false,
-    "code": "Subscription.prototype.startPulling = function() {\n  if (this.closed) {\n    return;\n  }\n  this.pull({\n    returnImmediately: false\n  }, function(err) {\n    if (err && err.code === 400) {\n      this.emit('error', err);\n    }\n    setTimeout(this.startPulling.bind(this), this.interval);\n  }.bind(this));\n};",
+    "code": "Subscription.prototype.startPulling_ = function() {\n  if (this.closed) {\n    return;\n  }\n  this.pull({\n    returnImmediately: false\n  }, function(err) {\n    if (err && err.code === 400) {\n      this.emit('error', err);\n    }\n    setTimeout(this.startPulling_.bind(this), this.interval);\n  }.bind(this));\n};",
     "ctx": {
       "type": "method",
       "constructor": "Subscription",
       "cons": "Subscription",
-      "name": "startPulling",
-      "string": "Subscription.prototype.startPulling()"
+      "name": "startPulling_",
+      "string": "Subscription.prototype.startPulling_()"
     }
   },
   {
     "tags": [
       {
         "type": "example",
-        "string": "subscription.startPulling();\nsubscription.stopPulling();"
+        "string": "subscription.stopPulling();"
       }
     ],
     "description": {
-      "full": "<p>Stop the subscription from automatically pulling. This is only necessary if<br />you had previously run {@linkcode module:pubsub/subscription#startPulling}.</p>",
-      "summary": "<p>Stop the subscription from automatically pulling. This is only necessary if<br />you had previously run {@linkcode module:pubsub/subscription#startPulling}.</p>",
+      "full": "<p>Stop the subscription from automatically pulling.</p>",
+      "summary": "<p>Stop the subscription from automatically pulling.</p>",
       "body": ""
     },
     "isPrivate": false,

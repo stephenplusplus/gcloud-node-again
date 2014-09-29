@@ -466,7 +466,7 @@
       },
       {
         "type": "example",
-        "string": "var subscription = topic.subscription('my-existing-subscription');\nsubscription.on('message', function(message) {)});\nsubscription.startPulling();"
+        "string": "var subscription = topic.subscription('my-existing-subscription');\n\n// Register a listener for `message` events.\nsubscription.on('message', function(message) {\n  // Called every time a message is received.\n  // message.id = ID used to acknowledge its receival.\n  // message.data = Contents of the message.\n});"
       }
     ],
     "description": {
