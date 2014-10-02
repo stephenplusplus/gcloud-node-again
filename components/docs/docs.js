@@ -16,7 +16,7 @@ angular
         var paragraphComments = /\/\/-+((\n|\r|.)*?(\/\/-))/g;
 
         if (!paragraphComments.test(str)) {
-          return '<div hljs language="javascript">' + str + '</div>';
+          return '<div hljs language="javascript">\n' + str + '</div>';
         }
 
         str = str.replace(paragraphComments, function(match, block) {
@@ -85,7 +85,7 @@ angular
         });
       }
       function reduceModules(acc, type, index, types) {
-        var CUSTOM_TYPES = ['query', 'dataset', 'topic', 'subscription'];
+        var CUSTOM_TYPES = ['query', 'dataset', 'transaction'];
         if (CUSTOM_TYPES.indexOf(type.toLowerCase()) > -1) {
           if (types[index - 1]) {
             type = types[index - 1] + '/' + type;
@@ -106,6 +106,9 @@ angular
               name: obj.ctx.name,
               constructor: obj.tags.some(function(tag) {
                   return tag.type === 'constructor';
+                }),
+              mixes: obj.tags.filter(function(tag) {
+                  return tag.type === 'mixes';
                 }),
               description: $sce.trustAsHtml(
                   formatHtml(detectLinks(detectModules(obj.description.full)))),
@@ -141,6 +144,43 @@ angular
       };
     }
 
+    function getMixIns($sce, $q, $http, version, baseUrl) {
+      return function(data) {
+        var methodWithMixIns = data.filter(function(method) {
+          return method.mixes;
+        })[0];
+        if (!methodWithMixIns) {
+          return data;
+        }
+        return $q
+          .all(getMixInMethods(methodWithMixIns))
+          .then(combineMixInMethods(data));
+      };
+      function getMixInMethods(method) {
+        return method.mixes.map(function (module) {
+          module = module.string.trim().replace('module:', '');
+          return $http.get(baseUrl + '/' + module + '.json')
+              .then(filterDocJson($sce, version))
+              .then(function(mixInData) {
+                return mixInData.filter(function(method) {
+                  return !method.constructor;
+                });
+              });
+        });
+      }
+      function combineMixInMethods(data) {
+        return function(mixInData) {
+          return mixInData
+            .reduce(function(acc, mixInMethods) {
+              return acc = acc.concat(mixInMethods);
+            }, data)
+            .sort(function(a, b) {
+              return a.name > b.name;
+            });
+        };
+      }
+    }
+
     function setSingleMethod(method) {
       return function(methods) {
         if (method && methods.some(function(methodObj) {
@@ -152,7 +192,7 @@ angular
       };
     }
 
-    function getMethods($http, $route, $sce, $location) {
+    function getMethods($http, $route, $sce, $q, $location) {
       var version = $route.current.params.version;
       var module = $route.current.params.module;
       var cl = $route.current.params.class;
@@ -168,6 +208,7 @@ angular
       }
       return $http.get(path.join('/'))
           .then(filterDocJson($sce, version))
+          .then(getMixIns($sce, $q, $http, version, 'json/' + version))
           .then(setSingleMethod($location.search().method));
     }
 
@@ -218,18 +259,6 @@ angular
         $location.path(url.replace('docs/', 'docs/' + versions[0] + '/'));
       }
     });
-  })
-
-  .directive('docsExample', function($compile) {
-    'use strict';
-
-    return {
-      link: function(scope, element, attr) {
-        scope.$watch(attr.ngBindHtml, function() {
-          $compile(element.contents())(scope);
-        }, true);
-      }
-    };
   })
 
   .controller('DocsCtrl', function($location, $scope, $routeParams, methods, $http, links, versions) {

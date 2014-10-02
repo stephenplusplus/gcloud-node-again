@@ -1,10 +1,14 @@
 angular.module('gcloud.docs')
-  .factory('getLinks', function(pages, versions) {
+  .factory('getLinks', function(pages) {
+    'use strict';
+
     return function(version) {
       var baseUrl = '#/docs/' + version;
       var VERSIONS = pages.VERSIONS;
+      var versions;
+      var match;
       if (!version || version === 'master') {
-        var versions = Object.keys(VERSIONS);
+        versions = Object.keys(VERSIONS);
         match = versions[versions.length - 1];
       } else {
         match = Object.keys(VERSIONS).filter(semver.satisfies.bind(null, version))[0];
